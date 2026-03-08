@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 500px; margin: 0 auto; }
+
+        header {
+            text-align: center;
+            padding: 24px 0 20px;
+        }
+
+        header h1 { font-size: 24px; color: #fff; }
+        header h1 span { color: #ffa726; }
+        header p { font-size: 13px; color: #777; margin-top: 4px; }
+
+        /* Setup Panel */
+        .panel {
+            background: rgba(20,20,20,0.9);
+            border: 1px solid rgba(255,167,38,0.2);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .panel h3 {
+            font-size: 14px; color: #ffa726;
+            margin-bottom: 14px; font-weight: 600;
+        }
+
+        .form-row {
+            display: flex; gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px; color: #888;
+            margin-bottom: 4px; font-weight: 600;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(10,10,10,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: rgba(255,167,38,0.4);
+        }
+
+        /* Operators */
+        .ops-row {
+            display: flex; gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .op-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,167,38,0.2);
+            background: transparent;
+            color: #888;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .op-btn.active {
+            background: rgba(255,167,38,0.15);
+            color: #ffa726;
+            border-color: #ffa726;
+        }
+
+        .op-btn:hover { border-color: #ffa726; }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none; border-radius: 10px;
+            font-size: 14px; font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-start {
+            background: #ffa726; color: #0a0a0a;
+        }
+
+        .btn-start:hover { background: #ffb74d; }
+
+        .btn-stop {
+            background: rgba(244,67,54,0.2); color: #f44336;
+        }
+
+        .btn-stop:hover { background: rgba(244,67,54,0.3); }
+
+        .btn-restart {
+            background: rgba(255,167,38,0.15); color: #ffa726;
+            margin-top: 10px;
+        }
+
+        .btn-restart:hover { background: rgba(255,167,38,0.25); }
+
+        /* Game area */
+        .game-area { display: none; }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex; gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: rgba(20,20,20,0.9);
+            border: 1px solid rgba(255,167,38,0.1);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-size: 22px; font-weight: 900;
+            color: #ffa726;
+        }
+
+        .stat-box .val.timer { color: #fff; }
+        .stat-box .val.correct { color: #4caf50; }
+        .stat-box .val.wrong { color: #f44336; }
+
+        .stat-box .lbl {
+            font-size: 10px; color: #777;
+            margin-top: 2px; text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Timer bar */
+        .timer-bar-wrap {
+            height: 4px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .timer-bar {
+            height: 100%;
+            background: #ffa726;
+            border-radius: 4px;
+            transition: width 1s linear;
+        }
+
+        .timer-bar.danger { background: #f44336; }
+
+        /* Question */
+        .question-card {
+            background: rgba(20,20,20,0.9);
+            border: 1px solid rgba(255,167,38,0.2);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .q-number {
+            font-size: 11px; color: #777;
+            margin-bottom: 8px; text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .q-expression {
+            font-size: 42px; font-weight: 900;
+            color: #fff;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+        }
+
+        .q-expression .q-op { color: #ffa726; }
+
+        .answer-input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(10,10,10,0.8);
+            border: 2px solid rgba(255,167,38,0.2);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .answer-input:focus { border-color: #ffa726; }
+
+        .answer-input.correct-flash {
+            border-color: #4caf50;
+            background: rgba(76,175,80,0.1);
+        }
+
+        .answer-input.wrong-flash {
+            border-color: #f44336;
+            background: rgba(244,67,54,0.1);
+        }
+
+        .hint {
+            font-size: 11px; color: #555;
+            margin-top: 8px;
+        }
+
+        /* Result */
+        .result-panel {
+            display: none;
+            text-align: center;
+        }
+
+        .result-panel .emoji { font-size: 48px; margin-bottom: 12px; }
+
+        .result-panel h2 {
+            font-size: 22px; color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .result-panel .score {
+            font-size: 48px; font-weight: 900;
+            color: #ffa726; margin-bottom: 4px;
+        }
+
+        .result-panel .sub {
+            font-size: 13px; color: #888;
+            margin-bottom: 16px;
+        }
+
+        .result-stats {
+            display: flex; gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .result-stat {
+            flex: 1;
+            background: rgba(20,20,20,0.9);
+            border: 1px solid rgba(255,167,38,0.1);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .result-stat .rs-val {
+            font-size: 20px; font-weight: 900;
+        }
+
+        .result-stat .rs-lbl {
+            font-size: 10px; color: #777;
+            margin-top: 2px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px; font-size: 11px; color: #444;
+        }
+
+        footer a { color: #ffa726; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧮 Math <span>Game</span></h1>
+            <p>Uji kecepatan hitungmu!</p>
+        </header>
+
+        <!-- SETUP -->
+        <div id="setupPanel">
+            <div class="panel">
+                <h3>⚙️ Pengaturan</h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Angka Minimum</label>
+                        <input type="number" id="minNum" value="1" min="0" max="999">
+                    </div>
+                    <div class="form-group">
+                        <label>Angka Maksimum</label>
+                        <input type="number" id="maxNum" value="10" min="1" max="999">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Jumlah Soal</label>
+                        <input type="number" id="totalQ" value="10" min="1" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Timer (detik/soal)</label>
+                        <input type="number" id="timerSec" value="15" min="3" max="120">
+                    </div>
+                </div>
+
+                <label style="font-size:11px; color:#888; font-weight:600; margin-bottom:6px; display:block;">Operasi</label>
+                <div class="ops-row">
+                    <button class="op-btn active" data-op="+" onclick="toggleOp(this)">+</button>
+                    <button class="op-btn active" data-op="-" onclick="toggleOp(this)">−</button>
+                    <button class="op-btn active" data-op="*" onclick="toggleOp(this)">×</button>
+                    <button class="op-btn active" data-op="/" onclick="toggleOp(this)">÷</button>
+                </div>
+
+                <button class="btn btn-start" onclick="startGame()">▶ Mulai</button>
+            </div>
+        </div>
+
+        <!-- GAME -->
+        <div class="game-area" id="gameArea">
+            <div class="stats-bar">
+                <div class="stat-box">
+                    <div class="val timer" id="timerVal">15</div>
+                    <div class="lbl">Detik</div>
+                </div>
+                <div class="stat-box">
+                    <div class="val" id="qNum">1/10</div>
+                    <div class="lbl">Soal</div>
+                </div>
+                <div class="stat-box">
+                    <div class="val correct" id="correctVal">0</div>
+                    <div class="lbl">Benar</div>
+                </div>
+                <div class="stat-box">
+                    <div class="val wrong" id="wrongVal">0</div>
+                    <div class="lbl">Salah</div>
+                </div>
+            </div>
+
+            <div class="timer-bar-wrap">
+                <div class="timer-bar" id="timerBar"></div>
+            </div>
+
+            <div class="question-card">
+                <div class="q-number" id="qLabel">SOAL 1</div>
+                <div class="q-expression" id="qExpr">
+                    <span id="qA">5</span>
+                    <span class="q-op" id="qOp">+</span>
+                    <span id="qB">3</span>
+                    <span class="q-op"> =</span>
+                </div>
+                <input type="number" class="answer-input" id="answerInput" placeholder="?" autofocus
+                    onkeydown="if(event.key==='Enter')submitAnswer()">
+                <p class="hint">Tekan Enter untuk jawab</p>
+            </div>
+
+            <button class="btn btn-stop" onclick="endGame()">⏹ Selesai</button>
+        </div>
+
+        <!-- RESULT -->
+        <div class="result-panel" id="resultPanel">
+            <div class="panel">
+                <div class="emoji" id="resultEmoji">🏆</div>
+                <h2>Selesai!</h2>
+                <div class="score" id="resultScore">85%</div>
+                <div class="sub" id="resultSub">8 dari 10 benar</div>
+
+                <div class="result-stats">
+                    <div class="result-stat">
+                        <div class="rs-val" style="color:#4caf50" id="rsCorrect">8</div>
+                        <div class="rs-lbl">Benar</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="rs-val" style="color:#f44336" id="rsWrong">1</div>
+                        <div class="rs-lbl">Salah</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="rs-val" style="color:#ffa726" id="rsSkip">1</div>
+                        <div class="rs-lbl">Timeout</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="rs-val" style="color:#fff" id="rsTime">0:45</div>
+                        <div class="rs-lbl">Waktu</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-start" onclick="resetGame()">🔄 Main Lagi</button>
+                <button class="btn btn-restart" onclick="backToSetup()">⚙️ Ubah Pengaturan</button>
+            </div>
+        </div>
+
+        <footer>
+            🕯️ Dibuat oleh <a href="https://agus-profile.vercel.app" target="_blank">Agus</a>
+        </footer>
+    </div>
+
+    <script>
+        let ops = ['+', '-', '*', '/'];
+        let questions = [];
+        let current = 0;
+        let correct = 0;
+        let wrong = 0;
+        let skipped = 0;
+        let timer = null;
+        let timeLeft = 0;
+        let maxTime = 15;
+        let totalQuestions = 10;
+        let gameStartTime = 0;
+
+        function toggleOp(btn) {
+            btn.classList.toggle('active');
+            ops = [];
+            document.querySelectorAll('.op-btn.active').forEach(b => {
+                ops.push(b.dataset.op);
+            });
+        }
+
+        function generateQuestions() {
+            const min = parseInt(document.getElementById('minNum').value);
+            const max = parseInt(document.getElementById('maxNum').value);
+            totalQuestions = parseInt(document.getElementById('totalQ').value);
+            maxTime = parseInt(document.getElementById('timerSec').value);
+            questions = [];
+
+            for (let i = 0; i < totalQuestions; i++) {
+                const op = ops[Math.floor(Math.random() * ops.length)];
+                let a, b, answer;
+
+                if (op === '/') {
+                    // Ensure clean division
+                    b = randInt(Math.max(1, min), max);
+                    const multiplier = randInt(min, max);
+                    a = b * multiplier;
+                    answer = multiplier;
+                } else {
+                    a = randInt(min, max);
+                    b = randInt(min, max);
+                    if (op === '+') answer = a + b;
+                    else if (op === '-') answer = a - b;
+                    else if (op === '*') answer = a * b;
+                }
+
+                const opDisplay = op === '*' ? '×' : op === '/' ? '÷' : op === '-' ? '−' : '+';
+                questions.push({ a, b, op: opDisplay, answer });
+            }
+        }
+
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function startGame() {
+            if (ops.length === 0) return alert('Pilih minimal 1 operasi!');
+            generateQuestions();
+            current = 0; correct = 0; wrong = 0; skipped = 0;
+            gameStartTime = Date.now();
+
+            document.getElementById('setupPanel').style.display = 'none';
+            document.getElementById('resultPanel').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[current];
+            document.getElementById('qLabel').textContent = `SOAL ${current + 1}`;
+            document.getElementById('qNum').textContent = `${current + 1}/${totalQuestions}`;
+            document.getElementById('qA').textContent = q.a;
+            document.getElementById('qOp').textContent = q.op;
+            document.getElementById('qB').textContent = q.b;
+            document.getElementById('correctVal').textContent = correct;
+            document.getElementById('wrongVal').textContent = wrong;
+
+            const input = document.getElementById('answerInput');
+            input.value = '';
+            input.className = 'answer-input';
+            input.focus();
+
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timer);
+            timeLeft = maxTime;
+            updateTimerDisplay();
+
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    skipped++;
+                    flashAnswer('wrong');
+                    setTimeout(nextQuestion, 600);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timerVal').textContent = timeLeft;
+            const bar = document.getElementById('timerBar');
+            const pct = (timeLeft / maxTime) * 100;
+            bar.style.width = pct + '%';
+            bar.className = pct <= 25 ? 'timer-bar danger' : 'timer-bar';
+        }
+
+        function submitAnswer() {
+            const input = document.getElementById('answerInput');
+            const val = input.value.trim();
+            if (val === '') return;
+
+            clearInterval(timer);
+            const q = questions[current];
+            const userAnswer = parseFloat(val);
+
+            if (Math.abs(userAnswer - q.answer) < 0.01) {
+                correct++;
+                flashAnswer('correct');
+            } else {
+                wrong++;
+                flashAnswer('wrong');
+            }
+
+            setTimeout(nextQuestion, 600);
+        }
+
+        function flashAnswer(type) {
+            const input = document.getElementById('answerInput');
+            input.className = 'answer-input ' + type + '-flash';
+        }
+
+        function nextQuestion() {
+            current++;
+            if (current >= totalQuestions) {
+                endGame();
+            } else {
+                showQuestion();
+            }
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            const elapsed = Math.round((Date.now() - gameStartTime) / 1000);
+            const answered = correct + wrong + skipped;
+            const pct = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+
+            const min = Math.floor(elapsed / 60);
+            const sec = elapsed % 60;
+            const timeStr = `${min}:${sec.toString().padStart(2, '0')}`;
+
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('resultPanel').style.display = 'block';
+
+            document.getElementById('resultScore').textContent = pct + '%';
+            document.getElementById('resultSub').textContent = `${correct} dari ${answered} benar`;
+            document.getElementById('rsCorrect').textContent = correct;
+            document.getElementById('rsWrong').textContent = wrong;
+            document.getElementById('rsSkip').textContent = skipped;
+            document.getElementById('rsTime').textContent = timeStr;
+
+            const emoji = pct === 100 ? '🏆' : pct >= 80 ? '🌟' : pct >= 60 ? '👍' : pct >= 40 ? '💪' : '📚';
+            document.getElementById('resultEmoji').textContent = emoji;
+        }
+
+        function resetGame() {
+            document.getElementById('resultPanel').style.display = 'none';
+            startGame();
+        }
+
+        function backToSetup() {
+            document.getElementById('resultPanel').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('setupPanel').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
